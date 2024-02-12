@@ -1,0 +1,63 @@
+version: '3'
+services:
+  ######################################################################
+  taskdb:
+    image: mysql:latest
+    container_name: servicesdb
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=taskdb
+      - MYSQL_ROOT_PASSWORD=123456
+    volumes:
+      - ./resources/static/database:/var/lib/mysql
+    command: '--default-authentication-plugin=mysql_native_password'
+    ports:
+      - "13306:3306"
+    networks:
+      - app-network
+  ######################################################################
+  taskservice1:
+    depends_on:
+      - taskdb
+    image: eliivanov66/taskservice:0.0.2
+    container_name: taskservice1
+    restart: unless-stopped
+    ports:
+      - "8191:8080"
+    networks:
+      - app-network
+  ######################################################################
+  taskservice2:
+    depends_on:
+      - taskdb
+    image: eliivanov66/taskservice:0.0.2
+    container_name: taskservice2
+    restart: unless-stopped
+    ports:
+      - "8192:8080"
+    networks:
+      - app-network
+  ######################################################################
+  taskservice3:
+    depends_on:
+      - taskdb
+    image: eliivanov66/taskservice:0.0.2
+    container_name: taskservice3
+    restart: unless-stopped
+    ports:
+      - "8193:8080"
+    networks:
+      - app-network
+  ######################################################################
+  taskserver:
+    image: eliivanov66/taskserver:0.0.1
+    container_name: taskserver
+    restart: unless-stopped
+    ports:
+      - "8090:8761"
+    networks:
+      - app-network
+  ######################################################################
+networks:
+  app-network:
+    driver: bridge

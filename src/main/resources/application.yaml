@@ -1,0 +1,32 @@
+server:
+  port: 8080
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8090/eureka
+    instance:
+    preferIpAddress: false
+
+spring:
+  main:
+    web-application-type: reactive
+
+  application:
+    name: taskgateway
+
+  cloud:
+    gateway:
+      routes:
+        - id: route_to_service_one
+          uri: http://localhost:8191/web/admin
+          predicates:
+            - Path=/taskservice1
+        - id: route_to_service_two
+          uri: http://localhost:8192/web/home
+          predicates:
+            - Path=/taskservice2
+        - id: route_to_service_three
+          uri: http://localhost:8193/web/login
+          predicates:
+            - Path=/taskservice3
