@@ -1,7 +1,8 @@
 version: '3'
 services:
   ######################################################################
-  taskdb:
+  servicesdb:
+    hostname: servicesdb
     image: mysql:latest
     container_name: servicesdb
     restart: unless-stopped
@@ -17,8 +18,10 @@ services:
       - app-network
   ######################################################################
   taskservice1:
+    hostname: taskservice1
     depends_on:
-      - taskdb
+      - servicesdb
+      - taskserver
     image: eliivanov66/taskservice:0.0.2
     container_name: taskservice1
     restart: unless-stopped
@@ -26,10 +29,15 @@ services:
       - "8191:8080"
     networks:
       - app-network
+#    environment:
+#      - eureka.client.service-url.defaultZone=http://taskserver:8761/eureka/
   ######################################################################
   taskservice2:
+    hostname: taskservice2
     depends_on:
-      - taskdb
+      - taskservice1
+      - servicesdb
+      - taskserver
     image: eliivanov66/taskservice:0.0.2
     container_name: taskservice2
     restart: unless-stopped
@@ -37,10 +45,15 @@ services:
       - "8192:8080"
     networks:
       - app-network
+#    environment:
+#      - eureka.client.service-url.defaultZone=http://taskserver:8761/eureka/
   ######################################################################
   taskservice3:
+    hostname: taskservice3
     depends_on:
-      - taskdb
+      - taskservice2
+      - servicesdb
+      - taskserver
     image: eliivanov66/taskservice:0.0.2
     container_name: taskservice3
     restart: unless-stopped
@@ -48,15 +61,35 @@ services:
       - "8193:8080"
     networks:
       - app-network
+#    environment:
+#      - eureka.client.service-url.defaultZone=http://taskserver:8761/eureka/
   ######################################################################
   taskserver:
+    hostname: taskserver
     image: eliivanov66/taskserver:0.0.1
     container_name: taskserver
     restart: unless-stopped
     ports:
-      - "8090:8761"
+      - "8190:8761"
     networks:
       - app-network
+  ######################################################################
+  taskgateway:
+    hostname: taskgateway
+    depends_on:
+      - taskserver
+      - taskservice1
+      - taskservice2
+      - taskservice3
+    image: eliivanov66/taskgateway:0.0.3
+    container_name: taskgateway
+    restart: unless-stopped
+    ports:
+      - "8180:8180"
+    networks:
+      - app-network
+#    environment:
+#      - eureka.client.service-url.defaultZone=http://taskserver:8761/eureka/
   ######################################################################
 networks:
   app-network:
